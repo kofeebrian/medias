@@ -14,13 +14,10 @@ const formatTime = (time: number) => {
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   }
-  return "00:00";
+  return "0:00";
 }
 
 export default function ProgressBar({ progressBarRef, audioPlayerRef, duration, time }: Props) {
-
-  const [progress, setProgress] = useState<number>(0);
-
   const handleProgressChange = () => {
     if (audioPlayerRef.current?.currentTime) {
       audioPlayerRef.current.currentTime = progressBarRef.current!.valueAsNumber;

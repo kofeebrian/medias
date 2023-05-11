@@ -16,13 +16,14 @@ interface Props {
   setCurrentSong: React.Dispatch<React.SetStateAction<number>>;
   repeatSong: boolean;
   setRepeatSong: React.Dispatch<React.SetStateAction<boolean>>;
+  shuffle: boolean,
+  setShuffle: React.Dispatch<React.SetStateAction<boolean>>;
   musicList: Array<any>;
   audioPlayerRef: MutableRefObject<HTMLAudioElement | null>;
   progressBarRef: MutableRefObject<HTMLInputElement | null>;
 }
 
 export default function PlayerControl({
-  audioPlayerRef,
   currentSong,
   setCurrentSong,
   musicList,
@@ -30,6 +31,8 @@ export default function PlayerControl({
   setPlayPause,
   repeatSong,
   setRepeatSong,
+  shuffle,
+  setShuffle
 }: Props) {
   const handleMusic = (action: string) => {
     if (action === "next") {
@@ -50,15 +53,17 @@ export default function PlayerControl({
 
   return (
     <div className="player-controls my-4 flex items-center justify-center gap-2">
-      <div className="shuffle-track">
-        <FontAwesomeIcon icon={faShuffle} className="h-6 w-6" />
+      <div className="shuffle-track" onClick={() => setShuffle(!shuffle)}>
+        <FontAwesomeIcon icon={faShuffle} 
+          className={`h-6 w-6 ${!shuffle ? "text-black" : "text-blue-600"}`}
+        />
       </div>
       <div className="prev-track" onClick={() => handleMusic("back")}>
         <FontAwesomeIcon icon={faBackwardStep} className="h-6 w-6" />
       </div>
       <button
         onClick={() => setPlayPause(!playPause)}
-        className="playpause-track flex h-12 w-12 items-center justify-center rounded-full bg-white"
+        className="playpause-track flex h-12 w-12 items-center justify-center rounded-full bg-white outline outline-blue-500 outline-2 outline-offset-[-4px]"
       >
         {!playPause ? (
           <FontAwesomeIcon icon={faPlay} className="h-6 w-6"></FontAwesomeIcon>

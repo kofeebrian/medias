@@ -17,6 +17,7 @@ export default function VolumeControl({ audioPlayerRef }: Props) {
   useEffect(() => {
     if (audioPlayerRef.current) {
       audioPlayerRef.current!.volume = volume / 100;
+      
     }
   }, [audioPlayerRef, volume]);
 

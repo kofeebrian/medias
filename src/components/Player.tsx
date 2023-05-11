@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
 } from "react";
-import useSWR from "swr";
 
 import ProgressBar from "@/components/ProgressBar";
 import VolumeControl from "./VolumeControl";
@@ -37,6 +36,11 @@ export default function Player() {
       imageSrc: "/music/cover/女王蜂 - メフィスト.jpg",
       musicSrc: "/music/女王蜂 - メフィスト.mp3",
     },
+    {
+      title: "レクイエム (feat. 星街すいせい)",
+      imageSrc: "/music/cover/レクイエム (feat. 星街すいせい).jpg",
+      musicSrc: "/music/レクイエム (feat. 星街すいせい).mp3",
+    },
   ]);
 
   const [playingList, setPlayingList] =
@@ -45,6 +49,7 @@ export default function Player() {
     );
   const [currentSong, setCurrentSong] = useState<number>(0);
   const [repeatSong, setRepeatSong] = useState<boolean>(false);
+  const [shuffle, setShuffle] = useState<boolean>(false);
   const [playPause, setPlayPause] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0);
   const [time, setTime] = useState<number>(0);
@@ -61,7 +66,7 @@ export default function Player() {
   };
 
   const repeat = useCallback(() => {
-    const currentTime = audioPlayerRef.current!.currentTime;
+    const currentTime = audioPlayerRef.current?.currentTime ?? 0;
     setTime(currentTime);
     if (duration) {
       progressBarRef.current!.value = `${currentTime}`;
@@ -83,8 +88,10 @@ export default function Player() {
   useEffect(() => {
     if (audioPlayerRef.current) {
       audioPlayerRef.current.load();
+      progressBarRef.current!.valueAsNumber = 0;
+      setTime(0);
     }
-  }, []);
+  }, [currentSong]);
 
   useEffect(() => {
     if (audioPlayerRef.current && playPause) {
@@ -100,47 +107,68 @@ export default function Player() {
     setCoverImage(playingList[currentSong].imageSrc);
   }, [currentSong, playingList]);
 
-  return (
-    <div className="player flex min-h-screen w-full flex-col items-center justify-center gap-2 overflow-hidden bg-teal-600/50">
-      <audio
-        ref={audioPlayerRef}
-        src={playingList[currentSong].musicSrc}
-        onLoadedMetadata={onLoadMetadata}
-        loop={repeatSong}
-      />
-      <div className="details text-center">
-        <div className="now-playing">PLAYING X OF Y</div>
-        <div className="track-art relative mx-auto my-2 h-48 w-48 overflow-hidden rounded-full bg-teal-600/50">
-          {coverImage && (
-            <Image src={coverImage} fill alt="playing-cover-image" />
-          )}
-        </div>
-        <h1 className="track-name text-3xl">
-          {playingList[currentSong].title}
-        </h1>
-        <p className="track-artist">Track Artist</p>
-      </div>
+  useEffect(() => {
+    if (shuffle) {
+      const shuffledList = [...musicList].sort(() => Math.random() - 0.5).slice(0, musicList.length);
+      setPlayingList(shuffledList);
+    } else {
+      setPlayingList(musicList);
+    }
+  }, [musicList, shuffle]);
 
-      <PlayerControl
-        musicList={playingList}
-        audioPlayerRef={audioPlayerRef}
-        progressBarRef={progressBarRef}
-        currentSong={currentSong}
-        setCurrentSong={setCurrentSong}
-        repeatSong={repeatSong}
-        setRepeatSong={setRepeatSong}
-        playPause={playPause}
-        setPlayPause={setPlayPause}
-      />
-      <ProgressBar
-        audioPlayerRef={audioPlayerRef}
-        progressBarRef={progressBarRef}
-        duration={duration}
-        time={time}
-        setTime={setTime}
-      />
-      <VolumeControl audioPlayerRef={audioPlayerRef} />
-    </div>
+  return (
+    <>
+      <div className="player relative flex min-h-screen w-full flex-col items-center justify-center gap-4 overflow-hidden">
+        {coverImage && (
+          <Image
+            src={coverImage}
+            fill
+            alt="playing-bg-image"
+            className="-z-[1000] object-cover blur-md"
+          />
+        )}
+        <audio
+          ref={audioPlayerRef}
+          src={playingList[currentSong].musicSrc}
+          onLoadedMetadata={onLoadMetadata}
+          loop={repeatSong}
+        />
+        <div className="details flex flex-col items-center justify-center gap-3 text-center">
+          <div className="now-playing">PLAYING X OF Y</div>
+          <div className="track-art relative mx-auto my-2 h-48 w-48 overflow-hidden rounded-full bg-teal-600/50">
+            {coverImage && (
+              <Image src={coverImage} fill alt="playing-cover-image" />
+            )}
+          </div>
+          <h1 className="track-name text-3xl">
+            {playingList[currentSong].title}
+          </h1>
+          <p className="track-artist">Track Artist</p>
+        </div>
+
+        <PlayerControl
+          musicList={playingList}
+          audioPlayerRef={audioPlayerRef}
+          progressBarRef={progressBarRef}
+          currentSong={currentSong}
+          setCurrentSong={setCurrentSong}
+          repeatSong={repeatSong}
+          setRepeatSong={setRepeatSong}
+          playPause={playPause}
+          setPlayPause={setPlayPause}
+          shuffle={shuffle}
+          setShuffle={setShuffle}
+        />
+        <ProgressBar
+          audioPlayerRef={audioPlayerRef}
+          progressBarRef={progressBarRef}
+          duration={duration}
+          time={time}
+          setTime={setTime}
+        />
+        <VolumeControl audioPlayerRef={audioPlayerRef} />
+      </div>
+    </>
   );
 }
 
