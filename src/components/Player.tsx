@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { motion } from "framer-motion";
 
 import ProgressBar from "@/components/ProgressBar";
 import VolumeControl from "./VolumeControl";
@@ -109,7 +110,9 @@ export default function Player() {
 
   useEffect(() => {
     if (shuffle) {
-      const shuffledList = [...musicList].sort(() => Math.random() - 0.5).slice(0, musicList.length);
+      const shuffledList = [...musicList]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, musicList.length);
       setPlayingList(shuffledList);
     } else {
       setPlayingList(musicList);
@@ -118,55 +121,98 @@ export default function Player() {
 
   return (
     <>
-      <div className="player relative flex min-h-screen w-full flex-col items-center justify-center gap-4 overflow-hidden">
+      <audio
+        ref={audioPlayerRef}
+        src={playingList[currentSong].musicSrc}
+        onLoadedMetadata={onLoadMetadata}
+        loop={repeatSong}
+      />
+      <div className="player relative flex min-h-screen w-full flex-col items-center overflow-hidden">
         {coverImage && (
           <Image
             src={coverImage}
             fill
             alt="playing-bg-image"
-            className="-z-[1000] object-cover blur-md"
+            className="absolute bottom-0 left-0 right-0 top-0 -z-[1000] object-cover blur-md"
           />
         )}
-        <audio
-          ref={audioPlayerRef}
-          src={playingList[currentSong].musicSrc}
-          onLoadedMetadata={onLoadMetadata}
-          loop={repeatSong}
-        />
-        <div className="details flex flex-col items-center justify-center gap-3 text-center">
-          <div className="now-playing">PLAYING X OF Y</div>
-          <div className="track-art relative mx-auto my-2 h-48 w-48 overflow-hidden rounded-full bg-teal-600/50">
+
+        <div className="details flex flex-[3_1] flex-col items-center justify-center gap-3 text-center">
+          <motion.div
+            className="track-art relative mx-auto my-2 h-48 w-48 overflow-hidden rounded-full bg-teal-600/50 shadow-md"
+            initial={{
+              rotate: 0,
+            }}
+            animate={{
+              rotate: [0, 360],
+            }}
+            transition={{
+              ease: "linear",
+              repeat: Infinity,
+              duration: 10,
+            }}
+          >
             {coverImage && (
               <Image src={coverImage} fill alt="playing-cover-image" />
             )}
-          </div>
-          <h1 className="track-name text-3xl">
+          </motion.div>
+          <motion.h1 
+            className="track-name z-50 text-3xl text-white mix-blend-difference"
+            // initial={{ translateX: 0 }}
+            // animate={{
+            //   translateX: [60, -60, -60, 60],
+            // }}
+            // transition={{
+            //   duration: 5,
+            //   repeatDelay: 1,
+            //   repeat: Infinity,
+            // }}
+          >
             {playingList[currentSong].title}
-          </h1>
+          </motion.h1>
           <p className="track-artist">Track Artist</p>
         </div>
 
-        <PlayerControl
-          musicList={playingList}
-          audioPlayerRef={audioPlayerRef}
-          progressBarRef={progressBarRef}
-          currentSong={currentSong}
-          setCurrentSong={setCurrentSong}
-          repeatSong={repeatSong}
-          setRepeatSong={setRepeatSong}
-          playPause={playPause}
-          setPlayPause={setPlayPause}
-          shuffle={shuffle}
-          setShuffle={setShuffle}
-        />
-        <ProgressBar
-          audioPlayerRef={audioPlayerRef}
-          progressBarRef={progressBarRef}
-          duration={duration}
-          time={time}
-          setTime={setTime}
-        />
-        <VolumeControl audioPlayerRef={audioPlayerRef} />
+        <div
+          className="
+          m-8 
+          p-4
+          flex
+          flex-[2_0]
+          w-4/5
+          flex-col
+          items-center
+          justify-center
+          rounded-2xl
+          bg-white/30
+          filter
+          backdrop-blur-xl
+          dark:bg-black/30
+          shadow-[0_4px_30px_rgba(0,0,0,.1)]
+          "
+        >
+          <PlayerControl
+            musicList={playingList}
+            audioPlayerRef={audioPlayerRef}
+            progressBarRef={progressBarRef}
+            currentSong={currentSong}
+            setCurrentSong={setCurrentSong}
+            repeatSong={repeatSong}
+            setRepeatSong={setRepeatSong}
+            playPause={playPause}
+            setPlayPause={setPlayPause}
+            shuffle={shuffle}
+            setShuffle={setShuffle}
+          />
+          <ProgressBar
+            audioPlayerRef={audioPlayerRef}
+            progressBarRef={progressBarRef}
+            duration={duration}
+            time={time}
+            setTime={setTime}
+          />
+          <VolumeControl audioPlayerRef={audioPlayerRef} />
+        </div>
       </div>
     </>
   );
